@@ -1,4 +1,4 @@
-name: "Gradle Build Action"
+name: "Gradle BuildJet Test Action"
 description: 'Configures Gradle for use in GitHub actions, caching useful state in the GitHub actions cache'
 
 # https://help.github.com/en/articles/metadata-syntax-for-github-actions
