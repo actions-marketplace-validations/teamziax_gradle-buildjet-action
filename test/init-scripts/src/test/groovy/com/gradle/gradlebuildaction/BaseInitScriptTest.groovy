@@ -16,14 +16,17 @@ import java.nio.file.Files
 import java.util.zip.GZIPOutputStream
 
 class BaseInitScriptTest extends Specification {
+    static final String GE_PLUGIN_VERSION = '3.14.1'
+    static final String CCUD_PLUGIN_VERSION = '1.11.1'
 
     static final TestGradleVersion GRADLE_3_X = new TestGradleVersion(GradleVersion.version('3.5.1'), 7, 9)
     static final TestGradleVersion GRADLE_4_X = new TestGradleVersion(GradleVersion.version('4.10.3'), 7, 10)
     static final TestGradleVersion GRADLE_5_X = new TestGradleVersion(GradleVersion.version('5.6.4'), 8, 12)
     static final TestGradleVersion GRADLE_6_NO_BUILD_SERVICE = new TestGradleVersion(GradleVersion.version('6.5.1'), 8, 14)
     static final TestGradleVersion GRADLE_6_X = new TestGradleVersion(GradleVersion.version('6.9.4'), 8, 15)
-    static final TestGradleVersion GRADLE_7_X = new TestGradleVersion(GradleVersion.version('7.6.1'), 8, 19)
-    static final TestGradleVersion GRADLE_8_X = new TestGradleVersion(GradleVersion.version('8.0.2'), 8, 19)
+    static final TestGradleVersion GRADLE_7_X = new TestGradleVersion(GradleVersion.version('7.6.2'), 8, 19)
+    static final TestGradleVersion GRADLE_8_0 = new TestGradleVersion(GradleVersion.version('8.0.2'), 8, 19)
+    static final TestGradleVersion GRADLE_8_X = new TestGradleVersion(GradleVersion.version('8.3'), 8, 19)
 
     static final List<TestGradleVersion> ALL_VERSIONS = [
         GRADLE_3_X, // First version where TestKit supports environment variables
@@ -32,14 +35,15 @@ class BaseInitScriptTest extends Specification {
         GRADLE_6_NO_BUILD_SERVICE, // Last version without build service support
         GRADLE_6_X,
         GRADLE_7_X,
+        GRADLE_8_0,
         GRADLE_8_X,
     ]
 
     static final List<TestGradleVersion> CONFIGURATION_CACHE_VERSIONS =
-        [GRADLE_7_X, GRADLE_8_X]
+        [GRADLE_7_X, GRADLE_8_0, GRADLE_8_X]
 
     static final List<TestGradleVersion> SETTINGS_PLUGIN_VERSIONS =
-        [GRADLE_6_X, GRADLE_7_X, GRADLE_8_X]
+        [GRADLE_6_X, GRADLE_7_X, GRADLE_8_0, GRADLE_8_X]
 
     static final String PUBLIC_BUILD_SCAN_ID = 'i2wepy2gr7ovw'
     static final String DEFAULT_SCAN_UPLOAD_TOKEN = 'scan-upload-token'
@@ -124,12 +128,17 @@ class BaseInitScriptTest extends Specification {
         buildFile << ''
     }
 
-    def declareGePluginApplication(GradleVersion gradleVersion) {
-        settingsFile.text = maybeAddPluginsToSettings(gradleVersion) + settingsFile.text
-        buildFile.text = maybeAddPluginsToRootProject(gradleVersion) + buildFile.text
+    def declareGePluginApplication(GradleVersion gradleVersion, URI serverUrl = mockScansServer.address) {
+        settingsFile.text = maybeAddPluginsToSettings(gradleVersion, null, serverUrl) + settingsFile.text
+        buildFile.text = maybeAddPluginsToRootProject(gradleVersion, null, serverUrl) + buildFile.text
     }
 
-    String maybeAddPluginsToSettings(GradleVersion gradleVersion) {
+    def declareGePluginAndCcudPluginApplication(GradleVersion gradleVersion, URI serverUrl = mockScansServer.address) {
+        settingsFile.text = maybeAddPluginsToSettings(gradleVersion, CCUD_PLUGIN_VERSION, serverUrl) + settingsFile.text
+        buildFile.text = maybeAddPluginsToRootProject(gradleVersion, CCUD_PLUGIN_VERSION, serverUrl) + buildFile.text
+    }
+
+    String maybeAddPluginsToSettings(GradleVersion gradleVersion, String ccudPluginVersion, URI serverUri) {
         if (gradleVersion < GradleVersion.version('5.0')) {
             '' // applied in build.gradle
         } else if (gradleVersion < GradleVersion.version('6.0')) {
@@ -137,10 +146,11 @@ class BaseInitScriptTest extends Specification {
         } else {
             """
               plugins {
-                id 'com.gradle.enterprise' version '3.13.3'
+                id 'com.gradle.enterprise' version '${GE_PLUGIN_VERSION}'
+                ${ccudPluginVersion ? "id 'com.gradle.common-custom-user-data-gradle-plugin' version '$ccudPluginVersion'" : ""}
               }
               gradleEnterprise {
-                server = '$mockScansServer.address'
+                server = '$serverUri'
                 buildScan {
                   publishAlways()
                 }
@@ -149,24 +159,26 @@ class BaseInitScriptTest extends Specification {
         }
     }
 
-    String maybeAddPluginsToRootProject(GradleVersion gradleVersion) {
+    String maybeAddPluginsToRootProject(GradleVersion gradleVersion, String ccudPluginVersion, URI serverUrl) {
         if (gradleVersion < GradleVersion.version('5.0')) {
             """
               plugins {
                 id 'com.gradle.build-scan' version '1.16'
+                ${ccudPluginVersion ? "id 'com.gradle.common-custom-user-data-gradle-plugin' version '$ccudPluginVersion'" : ""}
               }
               buildScan {
-                server = '$mockScansServer.address'
+                server = '$serverUrl'
                 publishAlways()
               }
             """
         } else if (gradleVersion < GradleVersion.version('6.0')) {
             """
               plugins {
-                id 'com.gradle.build-scan' version '3.13.3'
+                id 'com.gradle.build-scan' version '${GE_PLUGIN_VERSION}'
+                ${ccudPluginVersion ? "id 'com.gradle.common-custom-user-data-gradle-plugin' version '$ccudPluginVersion'" : ""}
               }
               gradleEnterprise {
-                server = '$mockScansServer.address'
+                server = '$serverUrl'
                 buildScan {
                   publishAlways()
                 }

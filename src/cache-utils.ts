@@ -37,6 +37,10 @@ export function isCacheWriteOnly(): boolean {
     return params.isCacheWriteOnly()
 }
 
+export function isCacheOverwriteExisting(): boolean {
+    return params.isCacheOverwriteExisting()
+}
+
 export function isCacheDebuggingEnabled(): boolean {
     return params.isCacheDebuggingEnabled()
 }
@@ -66,7 +70,7 @@ export class CacheKey {
  * - The cache protocol version
  * - The name of the cache
  * - The runner operating system
- * - The name of the Job being executed
+ * - The name of the workflow and Job being executed
  * - The matrix values for the Job being executed (job context)
  * - The SHA of the commit being executed
  *
@@ -109,7 +113,12 @@ function getCacheKeyEnvironment(): string {
 }
 
 function getCacheKeyJob(): string {
-    return process.env[CACHE_KEY_JOB_VAR] || `${github.context.workflow}-${github.context.job}`
+    return process.env[CACHE_KEY_JOB_VAR] || getCacheKeyForJob(github.context.workflow, github.context.job)
+}
+
+export function getCacheKeyForJob(workflowName: string, jobId: string): string {
+    const sanitizedWorkflow = workflowName.replace(/,/g, '').toLowerCase()
+    return `${sanitizedWorkflow}-${jobId}`
 }
 
 function getCacheKeyJobInstance(): string {
@@ -120,8 +129,23 @@ function getCacheKeyJobInstance(): string {
 
     // By default, we hash the full `matrix` data for the run, to uniquely identify this job invocation
     // The only way we can obtain the `matrix` data is via the `workflow-job-context` parameter in action.yml.
-    const workflowJobContext = params.getJobContext()
+    const workflowJobContext = params.getJobMatrix()
     return hashStrings([workflowJobContext])
+}
+
+export function getUniqueLabelForJobInstance(): string {
+    return getUniqueLabelForJobInstanceValues(github.context.workflow, github.context.job, params.getJobMatrix())
+}
+
+export function getUniqueLabelForJobInstanceValues(workflow: string, jobId: string, matrixJson: string): string {
+    const matrix = JSON.parse(matrixJson)
+    const matrixString = Object.values(matrix).join('-')
+    const label = matrixString ? `${workflow}-${jobId}-${matrixString}` : `${workflow}-${jobId}`
+    return sanitize(label)
+}
+
+function sanitize(value: string): string {
+    return value.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
 }
 
 function getCacheKeyJobExecution(): string {

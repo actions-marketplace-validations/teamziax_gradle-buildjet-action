@@ -29,6 +29,11 @@ jobs:
     with:
       cache-key-prefix: ${{github.run_number}}-
 
+  dependency-graph:
+    uses: ./.github/workflows/integ-test-dependency-graph.yml
+    with:
+      cache-key-prefix: ${{github.run_number}}-
+
   execution-with-caching:
     uses: ./.github/workflows/integ-test-execution-with-caching.yml
     with:
@@ -38,6 +43,13 @@ jobs:
     uses: ./.github/workflows/integ-test-execution.yml
     with:
       cache-key-prefix: ${{github.run_number}}-
+
+  gradle-enterprise-injection:
+    uses: ./.github/workflows/integ-test-inject-gradle-enterprise.yml
+    with:
+      cache-key-prefix: ${{github.run_number}}-
+    secrets:
+      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_SOLUTIONS_ACCESS_TOKEN }}
 
   provision-gradle-versions:
     uses: ./.github/workflows/integ-test-provision-gradle-versions.yml
@@ -76,5 +88,10 @@ jobs:
 
   sample-gradle-plugin:
     uses: ./.github/workflows/integ-test-sample-gradle-plugin.yml
+    with:
+      cache-key-prefix: ${{github.run_number}}-
+
+  toolchain-detection:
+    uses: ./.github/workflows/integ-test-detect-java-toolchains.yml
     with:
       cache-key-prefix: ${{github.run_number}}-

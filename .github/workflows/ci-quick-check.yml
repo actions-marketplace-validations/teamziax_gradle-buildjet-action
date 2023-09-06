@@ -22,7 +22,7 @@ jobs:
     - name: Configure Gradle as default for unit test
       uses: ./
       with:
-        gradle-version: 8.1.1
+        gradle-version: 8.3
     - name: Run tests
       run: |
         npm install
@@ -50,6 +50,13 @@ jobs:
       runner-os: '["ubuntu-latest"]'
       download-dist: true
 
+  dependency-graph:
+    needs: build-distribution
+    uses: ./.github/workflows/integ-test-dependency-graph.yml
+    with:
+      runner-os: '["ubuntu-latest"]'
+      download-dist: true
+
   execution-with-caching:
     needs: build-distribution
     uses: ./.github/workflows/integ-test-execution-with-caching.yml
@@ -63,6 +70,15 @@ jobs:
     with:
       runner-os: '["ubuntu-latest"]'
       download-dist: true
+
+  gradle-enterprise-injection:
+    needs: build-distribution
+    uses: ./.github/workflows/integ-test-inject-gradle-enterprise.yml
+    with:
+      runner-os: '["ubuntu-latest"]'
+      download-dist: true
+    secrets:
+      GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GE_SOLUTIONS_ACCESS_TOKEN }}
 
   provision-gradle-versions:
     needs: build-distribution
@@ -114,6 +130,13 @@ jobs:
   sample-gradle-plugin:
     needs: build-distribution
     uses: ./.github/workflows/integ-test-sample-gradle-plugin.yml
+    with:
+      runner-os: '["ubuntu-latest"]'
+      download-dist: true
+
+  toolchain-detection:
+    needs: build-distribution
+    uses: ./.github/workflows/integ-test-detect-java-toolchains.yml
     with:
       runner-os: '["ubuntu-latest"]'
       download-dist: true

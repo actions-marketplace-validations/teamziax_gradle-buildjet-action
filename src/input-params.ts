@@ -13,6 +13,10 @@ export function isCacheWriteOnly(): boolean {
     return getBooleanInput('cache-write-only')
 }
 
+export function isCacheOverwriteExisting(): boolean {
+    return getBooleanInput('cache-overwrite-existing')
+}
+
 export function isCacheStrictMatch(): boolean {
     return getBooleanInput('gradle-home-cache-strict-match')
 }
@@ -51,7 +55,7 @@ export function getArguments(): string[] {
 }
 
 // Internal parameters
-export function getJobContext(): string {
+export function getJobMatrix(): string {
     return core.getInput('workflow-job-context')
 }
 
@@ -61,6 +65,27 @@ export function getGithubToken(): string {
 
 export function isJobSummaryEnabled(): boolean {
     return getBooleanInput('generate-job-summary', true)
+}
+
+export function isDependencyGraphEnabled(): boolean {
+    return getBooleanInput('generate-dependency-graph', true)
+}
+
+export function getDependencyGraphOption(): DependencyGraphOption {
+    const val = core.getInput('dependency-graph')
+    switch (val.toLowerCase().trim()) {
+        case 'disabled':
+            return DependencyGraphOption.Disabled
+        case 'generate':
+            return DependencyGraphOption.Generate
+        case 'generate-and-submit':
+            return DependencyGraphOption.GenerateAndSubmit
+        case 'download-and-submit':
+            return DependencyGraphOption.DownloadAndSubmit
+    }
+    throw TypeError(
+        `The value '${val} is not valid for 'dependency-graph. Valid values are: [disabled, generate-and-upload, generate-and-submit, download-and-submit]. The default value is 'disabled'.`
+    )
 }
 
 function getBooleanInput(paramName: string, paramDefault = false): boolean {
@@ -74,4 +99,11 @@ function getBooleanInput(paramName: string, paramDefault = false): boolean {
             return true
     }
     throw TypeError(`The value '${paramValue} is not valid for '${paramName}. Valid values are: [true, false]`)
+}
+
+export enum DependencyGraphOption {
+    Disabled,
+    Generate,
+    GenerateAndSubmit,
+    DownloadAndSubmit
 }

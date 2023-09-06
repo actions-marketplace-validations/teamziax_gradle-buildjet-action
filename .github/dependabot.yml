@@ -10,12 +10,23 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+        - "*"
+
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "@types/node"
+      - dependency-name: "@types/node" # Breaking change: update with next major release
+      - dependency-name: "@octokit/rest" # Tied to node version
+    groups:
+      npm-dependencies:
+        patterns:
+        - "*"
+      
   - package-ecosystem: "gradle"
     directory: ".github/workflow-samples/gradle-plugin"
     registries:

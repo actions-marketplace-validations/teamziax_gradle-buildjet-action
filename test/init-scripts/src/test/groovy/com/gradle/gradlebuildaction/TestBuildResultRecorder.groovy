@@ -5,7 +5,7 @@ import groovy.json.JsonSlurper
 import static org.junit.Assume.assumeTrue
 
 class TestBuildResultRecorder extends BaseInitScriptTest {
-    def initScript = 'build-result-capture.init.gradle'
+    def initScript = 'gradle-build-action.build-result-capture.init.gradle'
 
     def "produces build results file for build with #testGradleVersion"() {
         assumeTrue testGradleVersion.compatibleWithCurrentJvm
@@ -154,7 +154,7 @@ class TestBuildResultRecorder extends BaseInitScriptTest {
         when:
         settingsFile.text = """
             plugins {
-                id 'com.gradle.enterprise' version '3.13.3' apply(false)
+                id 'com.gradle.enterprise' version '3.14.1' apply(false)
             }
             gradle.settingsEvaluated {
                 apply plugin: 'com.gradle.enterprise'
