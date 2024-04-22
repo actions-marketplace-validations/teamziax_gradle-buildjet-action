@@ -27,7 +27,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle
@@ -48,7 +48,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle
@@ -60,7 +60,7 @@ jobs:
       working-directory: .github/workflow-samples/groovy-dsl
       run: ./gradlew test --configuration-cache
     - name: Check that configuration-cache was used
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs')
@@ -79,7 +79,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle with no extracted cache entries restored
@@ -101,7 +101,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle
@@ -122,7 +122,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle
@@ -144,7 +144,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download distribution if required
       uses: ./.github/actions/download-dist
     - name: Setup Gradle
@@ -156,7 +156,7 @@ jobs:
       working-directory: .github/workflow-samples/kotlin-dsl
       run: ./gradlew test --configuration-cache
     - name: Check that configuration-cache was used
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs')
